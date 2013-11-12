@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<project name="HTTPTest" default="default" basedir=".">  
+    <!-- =========================================  
+        配置基本属性  
+    ========================================== -->  
+    <!-- 源码目录 -->  
+    <property name="src" value="src" />  
+    <!-- 依赖包地址 -->  
+    <property name="lib" value="lib" />  
+    <!-- 编译后class位置 -->  
+    <property name="build" value="target/build" />  
+    <!-- 类路径地址 -->  
+    <property name="classpath" location="${build}" />  
+    <!-- 最终成果地址 -->  
+    <property name="dist" value="target/dist" />  
+    <!--配置测试报告的属性-->  
+    <!-- 输出测试报告地址 -->  
+    <property name="report" value="target/report" />  
+    <property name="report.xml" value="${report}/junit/xml" />  
+    <property name="report.html" value="${report}/junit/html" />  
+  
+    <!--配置运行时classpath-->  
+    <path id="classpath.path">  
+        <pathelement path="${classpath}" />  
+        <fileset dir="${lib}">  
+            <include name="*.jar" />  
+        </fileset>  
+    </path>  
+  
+    <!--任务初始化-->  
+    <target name="init">  
+        <delete dir="${build}" />  
+        <delete dir="${report}" />  
+        <delete dir="${dist}" />  
+    	<copy todir="${build}">
+    		<fileset dir="${src}" includes="**/*.properties"/>
+    		</copy> 
+    </target>  
+	
+	
+	
+    <!--配置编译任务-->  
+    <target name="compile" depends="init">  
+        <mkdir dir="${build}" />  
+        <javac srcdir="${src}" destdir="${build}">  
+            <classpath refid="classpath.path" />  
+        </javac>  
+    </target>  
+    <!--配置打包任务-->  
+    <target name="dist" depends="compile">  
+        <mkdir dir="${dist}" />  
+        <jar jarfile="${dist}/test-junit-report.jar" basedir="${build}" />  
+    </target>  
+    <!--配置JUnit测试，打印测试结果-->  
+    <target name="test" depends="compile, dist">  
+        <mkdir dir="${report.xml}" />  
+        <mkdir dir="${report.html}" />  
+        <junit printsummary="yes" haltonfailure="no"  showoutput="true">  
+            <classpath refid="classpath.path" />  
+            <formatter type="xml" />  
+            <batchtest fork="yes" todir="${report.xml}">  
+                <fileset dir="${src}" includes="**/*Test.java" />  
+            </batchtest>  
+        </junit>  
+        <junitreport todir="${report.html}">  
+            <fileset dir="${report.xml}">  
+                <include name="*.xml" />  
+            </fileset>  
+            <report format="frames" todir="${report.html}" />  
+        </junitreport>  
+    </target>  
+    <!-- 默认Task -->  
+    <target name="default" depends="test" />  
+</project>  
